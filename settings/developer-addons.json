@@ -1,0 +1,92 @@
+[
+  {
+    "slug": "protonvpn-launcher",
+    "name": "ProtonVpn Launcher",
+    "summary": "A simple extension to open ProtonVpn from the toolbar.",
+    "rating": 0,
+    "reviews": 0,
+    "users": 561,
+    "icon": "https://addons.mozilla.org/user-media/addon_icons/2919/2919499-64.png?modified=627e4b4d",
+    "url": "https://addons.mozilla.org/en-GB/firefox/addon/protonvpn-launcher/"
+  },
+  {
+    "slug": "protonpass-launcher",
+    "name": "ProtonPass Launcher",
+    "summary": "A simple extension to open ProtonPass from the toolbar.",
+    "rating": 0,
+    "reviews": 0,
+    "users": 138,
+    "icon": "https://addons.mozilla.org/user-media/addon_icons/2919/2919497-64.png?modified=6e3e9c0a",
+    "url": "https://addons.mozilla.org/en-GB/firefox/addon/protonpass-launcher/"
+  },
+  {
+    "slug": "protonmail-launcher",
+    "name": "ProtonMail Launcher",
+    "summary": "A simple extension to open ProtonMail from the toolbar.",
+    "rating": 0,
+    "reviews": 0,
+    "users": 12,
+    "icon": "https://addons.mozilla.org/user-media/addon_icons/2919/2919495-64.png?modified=a20aa5de",
+    "url": "https://addons.mozilla.org/en-GB/firefox/addon/protonmail-launcher/"
+  },
+  {
+    "slug": "tabby-time-tracker",
+    "name": "Tab Time Tracker - Private & Safe",
+    "summary": "Tracks the amount of time spent on each tab.",
+    "rating": 0,
+    "reviews": 0,
+    "users": 10,
+    "icon": "https://addons.mozilla.org/user-media/addon_icons/2920/2920717-64.png?modified=4000a115",
+    "url": "https://addons.mozilla.org/en-GB/firefox/addon/tabby-time-tracker/"
+  },
+  {
+    "slug": "oled-chatgpt-theme",
+    "name": "OLED ChatGPT Theme",
+    "summary": "OLED-style for ChatGPT",
+    "rating": 5,
+    "reviews": 1,
+    "users": 10,
+    "icon": "https://addons.mozilla.org/user-media/addon_icons/2920/2920665-64.png?modified=15992a32",
+    "url": "https://addons.mozilla.org/en-GB/firefox/addon/oled-chatgpt-theme/"
+  },
+  {
+    "slug": "smoothcorners",
+    "name": "SmoothCorners \u2014 Rounded Web UI",
+    "summary": "SmoothCorners applies a sleek, modern rounded look to all websites you visit.",
+    "rating": 1,
+    "reviews": 1,
+    "users": 2,
+    "icon": "https://addons.mozilla.org/user-media/addon_icons/2920/2920681-64.png?modified=514953b8",
+    "url": "https://addons.mozilla.org/en-GB/firefox/addon/smoothcorners/"
+  },
+  {
+    "slug": "web-troller",
+    "name": "Web Troller",
+    "summary": "Apply harmless pranks to web pages.",
+    "rating": 0,
+    "reviews": 0,
+    "users": 1,
+    "icon": "https://addons.mozilla.org/user-media/addon_icons/2920/2920648-64.png?modified=625b02f2",
+    "url": "https://addons.mozilla.org/en-GB/firefox/addon/web-troller/"
+  },
+  {
+    "slug": "roundify",
+    "name": "Roundify",
+    "summary": "Automatically applies intelligent, smooth rounded corners across the web while preserving usability and performance.",
+    "rating": 0,
+    "reviews": 0,
+    "users": 1,
+    "icon": "https://addons.mozilla.org/user-media/addon_icons/3025/3025700-64.png?modified=d053ab16",
+    "url": "https://addons.mozilla.org/en-GB/firefox/addon/roundify/"
+  },
+  {
+    "slug": "amoler",
+    "name": "AMOLER",
+    "summary": "OLED theme",
+    "rating": 0,
+    "reviews": 0,
+    "users": 0,
+    "icon": "https://addons.mozilla.org/static-server/img/addon-icons/default-64.png",
+    "url": "https://addons.mozilla.org/en-GB/firefox/addon/amoler/"
+  }
+]

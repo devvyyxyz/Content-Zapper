@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Content Zapper — Settings</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff; --bg-card: #f8f8f8; --text: #111; --text-sec: #666;
+      --text-muted: #999; --border: #e5e5e5; --red: #cc2222; --red-bg: #fef2f2;
+      --hover: #f0f0f0;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #151515; --bg-card: #1e1e1e; --text: #e0e0e0; --text-sec: #888;
+        --text-muted: #555; --border: #2a2a2a; --red: #e03030; --red-bg: #201212;
+        --hover: #252525;
+      }
+    }
+    :root[data-theme="light"] {
+      --bg: #ffffff; --bg-card: #f8f8f8; --text: #111; --text-sec: #666;
+      --text-muted: #999; --border: #e5e5e5; --red: #cc2222; --red-bg: #fef2f2; --hover: #f0f0f0;
+    }
+    :root[data-theme="dark"] {
+      --bg: #151515; --bg-card: #1e1e1e; --text: #e0e0e0; --text-sec: #888;
+      --text-muted: #555; --border: #2a2a2a; --red: #e03030; --red-bg: #201212; --hover: #252525;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.5;
+      max-width: 600px; margin: 0 auto;
+    }
+
+    /* ---- Top bar ---- */
+    .topbar {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 20px; border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; background: var(--bg); z-index: 10;
+    }
+    .topbar-back {
+      border: none; background: none; color: var(--text-sec);
+      cursor: pointer; font-size: 18px; padding: 4px 8px;
+    }
+    .topbar-back:hover { color: var(--text); }
+    .topbar h1 { font-size: 16px; font-weight: 600; }
+
+    /* ---- Sections ---- */
+    .section {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.6px; color: var(--text-muted);
+      padding: 12px 20px 6px;
+    }
+
+    .setting {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 20px;
+    }
+    .setting:hover { background: var(--hover); }
+
+    .setting-info { flex: 1; margin-right: 16px; }
+    .setting-label { font-size: 13px; color: var(--text); }
+    .setting-desc { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+    /* ---- Toggle ---- */
+    .toggle {
+      position: relative; width: 38px; height: 22px;
+      background: var(--border); border-radius: 11px;
+      cursor: pointer; flex-shrink: 0; transition: background 0.15s;
+    }
+    .toggle.on { background: var(--red); }
+    .toggle::after {
+      content: ''; position: absolute; top: 3px; left: 3px;
+      width: 16px; height: 16px; background: #fff;
+      border-radius: 50%; transition: transform 0.15s;
+    }
+    .toggle.on::after { transform: translateX(16px); }
+
+    /* ---- Select ---- */
+    .select {
+      padding: 5px 8px; border: 1px solid var(--border); border-radius: 5px;
+      background: var(--bg); color: var(--text); font-size: 12px;
+      cursor: pointer; outline: none;
+    }
+    .select:focus { border-color: var(--red); }
+
+    /* ---- Text input ---- */
+    .text-input {
+      width: 100%; padding: 8px 10px; border: 1px solid var(--border);
+      border-radius: 5px; background: var(--bg); color: var(--text);
+      font-size: 12px; font-family: 'SF Mono', Consolas, Monaco, monospace;
+      outline: none; resize: vertical;
+    }
+    .text-input:focus { border-color: var(--red); }
+    .text-input::placeholder { color: var(--text-muted); }
+
+    .input-hint {
+      font-size: 11px; color: var(--text-muted); margin-top: 4px;
+    }
+
+    /* ---- Textarea area ---- */
+    .textarea-setting {
+      padding: 10px 20px 16px;
+    }
+
+    /* ---- Button ---- */
+    .btn {
+      padding: 7px 14px; border: 1px solid var(--border); border-radius: 5px;
+      background: var(--bg); color: var(--text); font-size: 12px; cursor: pointer;
+    }
+    .btn:hover { background: var(--hover); }
+    .btn.danger { color: var(--red); }
+    .btn.danger:hover { background: var(--red-bg); }
+
+    .btn-row { display: flex; gap: 8px; padding: 10px 20px 16px; }
+
+    /* ---- Shortcut display ---- */
+    .kbd {
+      display: inline-block; padding: 2px 6px; border: 1px solid var(--border);
+      border-radius: 3px; font-size: 11px; font-family: 'SF Mono', Consolas, monospace;
+      color: var(--text-sec); background: var(--bg-card);
+    }
+
+    /* ---- Toast ---- */
+    .toast {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: var(--text); color: var(--bg); padding: 8px 16px;
+      border-radius: 6px; font-size: 12px; z-index: 200;
+      opacity: 0; transition: opacity 0.2s; pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
+
+    /* ---- Developer section ---- */
+    .dev-header {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 20px; border-bottom: 1px solid var(--border);
+    }
+    .dev-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 1px solid var(--border);
+    }
+    .dev-info { flex: 1; }
+    .dev-name { font-size: 14px; font-weight: 600; }
+    .dev-handle { font-size: 12px; color: var(--text-muted); }
+    .dev-links { display: flex; gap: 8px; }
+    .btn-link {
+      padding: 5px 12px; border: 1px solid var(--border); border-radius: 5px;
+      background: var(--bg); color: var(--text-sec); font-size: 11px;
+      cursor: pointer; text-decoration: none; display: inline-flex;
+      align-items: center; gap: 5px;
+    }
+    .btn-link:hover { background: var(--hover); color: var(--text); }
+
+    /* ---- Addon cards ---- */
+    .addon-list {
+      list-style: none;
+    }
+
+    .addon-card {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 20px;
+      border-bottom: 1px solid var(--border);
+      text-decoration: none; color: var(--text);
+    }
+    .addon-card:hover { background: var(--hover); }
+    .addon-card:last-child { border-bottom: none; }
+
+    .addon-icon {
+      width: 36px; height: 36px; border-radius: 6px;
+      border: 1px solid var(--border); flex-shrink: 0;
+      background: var(--bg-card);
+    }
+
+    .addon-info { flex: 1; min-width: 0; }
+    .addon-name {
+      font-size: 13px; font-weight: 500;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .addon-summary {
+      font-size: 11px; color: var(--text-muted);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      margin-top: 1px;
+    }
+
+    .addon-stats {
+      display: flex; flex-direction: column; align-items: flex-end; gap: 2px;
+      flex-shrink: 0;
+    }
+
+    .addon-users {
+      font-size: 12px; font-weight: 600; color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+    .addon-rating {
+      font-size: 11px; color: var(--text-muted);
+    }
+    .addon-stars {
+      color: var(--text-muted); font-size: 10px; letter-spacing: -1px;
+    }
+
+    .addon-refresh {
+      display: flex; align-items: center; justify-content: center;
+      gap: 6px; padding: 8px 20px 14px;
+      font-size: 11px; color: var(--text-muted);
+    }
+    .btn-refresh-stats {
+      border: 1px solid var(--border); border-radius: 4px;
+      background: var(--bg); color: var(--text-sec); font-size: 11px;
+      padding: 3px 10px; cursor: pointer;
+    }
+    .btn-refresh-stats:hover { background: var(--hover); }
+    .btn-refresh-stats.loading { opacity: 0.5; pointer-events: none; }
+
+    .addon-summary-bar {
+      padding: 8px 20px; border-top: 1px solid var(--border);
+      font-size: 11px; color: var(--text-muted);
+      display: flex; gap: 16px;
+    }
+    .addon-summary-bar span { font-variant-numeric: tabular-nums; }
+    .addon-summary-bar strong { color: var(--text-sec); }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <button class="topbar-back" id="btnBack" title="Back">&#8592;</button>
+    <h1>Advanced Settings</h1>
+  </div>
+
+  <!-- Appearance -->
+  <div class="section">
+    <div class="section-title">Appearance</div>
+    <div class="setting">
+      <div class="setting-info">
+        <div class="setting-label">Theme</div>
+        <div class="setting-desc">UI color scheme for popup and pages</div>
+      </div>
+      <select class="select" id="theme">
+        <option value="auto">System default</option>
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+      </select>
+    </div>
+    <div class="setting">
+      <div class="setting-info">
+        <div class="setting-label">Show element path bar</div>
+        <div class="setting-desc">Bottom bar showing hovered element details</div>
+      </div>
+      <div class="toggle on" data-key="showPath"></div>
+    </div>
+    <div class="setting">
+      <div class="setting-info">
+        <div class="setting-label">Toast notifications</div>
+        <div class="setting-desc">Brief confirmations after actions</div>
+      </div>
+      <div class="toggle on" data-key="showToast"></div>
+    </div>
+    <div class="setting">
+      <div class="setting-info">
+        <div class="setting-label">Zap animations</div>
+        <div class="setting-desc">Fade-out animation when elements are removed</div>
+      </div>
+      <div class="toggle on" data-key="animation"></div>
+    </div>
+  </div>
+
+  <!-- Behavior -->
+  <div class="section">
+    <div class="section-title">Behavior</div>
+    <div class="setting">
+      <div class="setting-info">
+        <div class="setting-label">Record zap history</div>
+        <div class="setting-desc">Save selectors to dashboard for later review</div>
+      </div>
+      <div class="toggle on" data-key="recordHistory"></div>
+    </div>
+    <div class="setting">
+      <div class="setting-info">
+        <div class="setting-label">Badge counter</div>
+        <div class="setting-desc">Show zap count on toolbar icon</div>
+      </div>
+      <div class="toggle on" data-key="showBadge"></div>
+    </div>
+  </div>
+
+  <!-- Shortcuts -->
+  <div class="section">
+    <div class="section-title">Keyboard Shortcuts</div>
+    <div class="setting">
+      <div class="setting-info">
+        <div class="setting-label">Toggle Zapper</div>
+      </div>
+      <span class="kbd">Alt</span> + <span class="kbd">Z</span>
+    </div>
+    <div class="setting">
+      <div class="setting-info">
+        <div class="setting-label">Undo last zap</div>
+      </div>
+      <span class="kbd">Alt</span> + <span class="kbd">Shift</span> + <span class="kbd">Z</span>
+    </div>
+    <div class="setting">
+      <div class="setting-info">
+        <div class="setting-label">Exit Zapper</div>
+      </div>
+      <span class="kbd">Esc</span>
+    </div>
+  </div>
+
+  <!-- Selector blacklist -->
+  <div class="section">
+    <div class="section-title">Selector Blacklist</div>
+    <div class="textarea-setting">
+      <textarea class="text-input" id="blacklist" rows="4"
+        placeholder="One CSS selector per line.&#10;e.g.  .cookie-banner, #newsletter-popup, div.ad-container"></textarea>
+      <div class="input-hint">These selectors will be automatically zapped on every page load.</div>
+    </div>
+  </div>
+
+  <!-- Data -->
+  <div class="section">
+    <div class="section-title">Data</div>
+    <div class="btn-row">
+      <button class="btn" id="btnExportSettings">Export settings</button>
+      <button class="btn" id="btnImportSettings">Import settings</button>
+      <button class="btn danger" id="btnResetAll">Reset all</button>
+    </div>
+    <input type="file" id="fileImport" accept=".json" style="display:none;">
+  </div>
+
+  <!-- Developer -->
+  <div class="section">
+    <div class="section-title">Developer</div>
+    <div class="dev-header">
+      <img class="dev-avatar" src="https://addons.mozilla.org/user-media/userpics/66/7466/18887466/18887466.png?modified=1749750052" alt="">
+      <div class="dev-info">
+        <div class="dev-name">devvyyxyz</div>
+        <div class="dev-handle">Firefox Add-ons Author</div>
+      </div>
+      <div class="dev-links">
+        <a class="btn-link" href="https://github.com/sponsors/devvyyxyz" target="_blank">&#9829; Sponsor</a>
+        <a class="btn-link" href="https://addons.mozilla.org/en-GB/firefox/user/18887466/" target="_blank">AMO Profile &#8599;</a>
+      </div>
+    </div>
+    <ul class="addon-list" id="addonList">
+      <!-- Rendered by JS -->
+    </ul>
+    <div class="addon-summary-bar" id="addonSummary"></div>
+    <div class="addon-refresh">
+      <span id="lastRefreshed"></span>
+      <button class="btn-refresh-stats" id="btnRefreshAddons">&#8635; Refresh stats</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="settings.js"></script>
+</body>
+</html>

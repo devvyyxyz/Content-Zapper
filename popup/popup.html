@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Content Zapper</title>
+  <style>
+    /* ---- Reset ---- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff;
+      --bg-secondary: #f5f5f5;
+      --text: #111111;
+      --text-secondary: #666666;
+      --text-muted: #999999;
+      --border: #e0e0e0;
+      --red: #cc2222;
+      --red-bg: #fff0f0;
+      --red-text: #cc2222;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1a1a1a;
+        --bg-secondary: #252525;
+        --text: #e8e8e8;
+        --text-secondary: #999999;
+        --text-muted: #555555;
+        --border: #333333;
+        --red: #e03030;
+        --red-bg: #2a1515;
+        --red-text: #e03030;
+      }
+    }
+
+    :root[data-theme="light"] {
+      --bg: #ffffff; --bg-secondary: #f5f5f5; --text: #111111;
+      --text-secondary: #666666; --text-muted: #999999;
+      --border: #e0e0e0; --red: #cc2222; --red-bg: #fff0f0; --red-text: #cc2222;
+    }
+
+    :root[data-theme="dark"] {
+      --bg: #1a1a1a; --bg-secondary: #252525; --text: #e8e8e8;
+      --text-secondary: #999999; --text-muted: #555555;
+      --border: #333333; --red: #e03030; --red-bg: #2a1515; --red-text: #e03030;
+    }
+
+    body {
+      width: 280px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* ---- Header ---- */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-logo { width: 22px; height: 22px; }
+
+    .header-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .header-badge {
+      margin-left: auto;
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .header-badge.active {
+      border-color: var(--red);
+      color: var(--red);
+      background: var(--red-bg);
+    }
+
+    /* ---- Toggle ---- */
+    .controls { padding: 10px 14px; }
+
+    .btn-toggle {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-toggle:hover { background: var(--bg-secondary); }
+
+    .btn-toggle.active {
+      border-color: var(--red);
+      color: var(--red);
+      background: var(--red-bg);
+    }
+
+    /* ---- Action row ---- */
+    .action-row {
+      display: flex;
+      gap: 6px;
+      padding: 0 14px 10px;
+    }
+
+    .btn-sm {
+      flex: 1;
+      padding: 6px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      background: var(--bg);
+      color: var(--text-secondary);
+      font-size: 11px;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .btn-sm:hover { background: var(--bg-secondary); }
+    .btn-sm:disabled { opacity: 0.3; cursor: default; }
+    .btn-sm:disabled:hover { background: var(--bg); }
+
+    /* ---- Nav links ---- */
+    .nav {
+      border-top: 1px solid var(--border);
+      padding: 6px 0;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 8px 14px;
+      border: none;
+      background: none;
+      color: var(--text-secondary);
+      font-size: 12px;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .nav-item:hover { background: var(--bg-secondary); color: var(--text); }
+
+    .nav-arrow { margin-left: auto; color: var(--text-muted); font-size: 10px; }
+
+    /* ---- Footer ---- */
+    .footer {
+      padding: 8px 14px;
+      font-size: 10px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <img class="header-logo" src="../icons/icon-32.png" alt="">
+    <span class="header-title">Content Zapper</span>
+    <span class="header-badge" id="badge">OFF</span>
+  </div>
+
+  <div class="controls">
+    <button class="btn-toggle" id="btnToggle">Activate Zapper</button>
+  </div>
+
+  <div class="action-row">
+    <button class="btn-sm" id="btnUndo" disabled>&#8630; Undo</button>
+    <button class="btn-sm" id="btnRefresh">&#8635; Reset page</button>
+  </div>
+
+  <div class="nav">
+    <button class="nav-item" id="navDashboard">
+      Dashboard
+      <span class="nav-arrow">&#8250;</span>
+    </button>
+    <button class="nav-item" id="navSettings">
+      Advanced Settings
+      <span class="nav-arrow">&#8250;</span>
+    </button>
+  </div>
+
+  <div class="footer">Alt+Z to toggle &middot; Esc to exit</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

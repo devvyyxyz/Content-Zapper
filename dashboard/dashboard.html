@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Content Zapper — Control Panel</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff; --bg-card: #f8f8f8; --text: #111; --text-sec: #666;
+      --text-muted: #999; --border: #e5e5e5; --red: #cc2222; --red-bg: #fef2f2;
+      --hover: #f0f0f0; --monospace: 'SF Mono', 'Consolas', 'Monaco', monospace;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #151515; --bg-card: #1e1e1e; --text: #e0e0e0; --text-sec: #888;
+        --text-muted: #555; --border: #2a2a2a; --red: #e03030; --red-bg: #201212;
+        --hover: #252525;
+      }
+    }
+
+    :root[data-theme="light"] {
+      --bg: #ffffff; --bg-card: #f8f8f8; --text: #111; --text-sec: #666;
+      --text-muted: #999; --border: #e5e5e5; --red: #cc2222; --red-bg: #fef2f2; --hover: #f0f0f0;
+    }
+    :root[data-theme="dark"] {
+      --bg: #151515; --bg-card: #1e1e1e; --text: #e0e0e0; --text-sec: #888;
+      --text-muted: #555; --border: #2a2a2a; --red: #e03030; --red-bg: #201212; --hover: #252525;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.5;
+      max-width: 720px; margin: 0 auto; padding: 0;
+    }
+
+    /* ---- Top bar ---- */
+    .topbar {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 20px; border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; background: var(--bg); z-index: 10;
+    }
+    .topbar-logo { width: 20px; height: 20px; }
+    .topbar h1 { font-size: 15px; font-weight: 600; }
+    .topbar-count {
+      margin-left: auto; font-size: 12px; color: var(--text-muted);
+      font-variant-numeric: tabular-nums; display: none;
+    }
+
+    /* ---- Main tab bar (Dashboard / Settings) ---- */
+    .main-tabs {
+      display: flex; border-bottom: 1px solid var(--border); padding: 0 20px;
+    }
+    .main-tab {
+      padding: 10px 18px; border: none; background: none;
+      color: var(--text-muted); font-size: 13px; font-weight: 500;
+      cursor: pointer; border-bottom: 2px solid transparent;
+      margin-bottom: -1px; transition: color 0.15s;
+    }
+    .main-tab:hover { color: var(--text); }
+    .main-tab.active { color: var(--text); border-bottom-color: var(--red); }
+
+    /* ---- Tab panels ---- */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ==============================================
+       DASHBOARD PANEL STYLES
+       ============================================== */
+
+    /* Sub-tab bar */
+    .sub-tabs {
+      display: flex; border-bottom: 1px solid var(--border); padding: 0 20px;
+    }
+    .sub-tab {
+      padding: 9px 14px; border: none; background: none;
+      color: var(--text-muted); font-size: 12px; font-weight: 500;
+      cursor: pointer; border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+    }
+    .sub-tab:hover { color: var(--text); }
+    .sub-tab.active { color: var(--text); border-bottom-color: var(--red); }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex; gap: 8px; padding: 12px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .toolbar-search {
+      flex: 1; padding: 7px 10px; border: 1px solid var(--border);
+      border-radius: 5px; background: var(--bg); color: var(--text);
+      font-size: 13px; font-family: inherit; outline: none;
+    }
+    .toolbar-search:focus { border-color: var(--red); }
+    .toolbar-search::placeholder { color: var(--text-muted); }
+
+    .btn-tool {
+      padding: 7px 12px; border: 1px solid var(--border); border-radius: 5px;
+      background: var(--bg); color: var(--text-sec); font-size: 12px;
+      cursor: pointer; white-space: nowrap;
+    }
+    .btn-tool:hover { background: var(--hover); }
+    .btn-tool.danger { color: var(--red); }
+    .btn-tool.danger:hover { background: var(--red-bg); }
+
+    /* Site list */
+    .site-list { list-style: none; }
+    .site-item { border-bottom: 1px solid var(--border); }
+    .site-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 20px; cursor: pointer; background: var(--bg);
+    }
+    .site-header:hover { background: var(--hover); }
+    .site-chevron {
+      font-size: 10px; color: var(--text-muted); transition: transform 0.15s;
+      width: 16px; text-align: center;
+    }
+    .site-item.open .site-chevron { transform: rotate(90deg); }
+    .site-domain {
+      font-size: 13px; font-weight: 500; color: var(--text);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .site-count {
+      font-size: 11px; color: var(--text-muted); white-space: nowrap;
+      background: var(--bg-card); padding: 1px 7px; border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    .site-actions { margin-left: auto; display: flex; gap: 6px; }
+
+    .btn-icon {
+      border: none; background: none; color: var(--text-muted);
+      cursor: pointer; font-size: 13px; padding: 3px 6px; border-radius: 4px;
+    }
+    .btn-icon:hover { background: var(--hover); color: var(--text); }
+    .btn-icon.danger:hover { color: var(--red); background: var(--red-bg); }
+
+    /* Zap entries */
+    .zap-list {
+      display: none; list-style: none; background: var(--bg-card);
+    }
+    .site-item.open .zap-list { display: block; }
+
+    .zap-entry {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 20px 8px 46px; border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .zap-entry:last-child { border-bottom: none; }
+
+    .zap-selector {
+      flex: 1; font-family: var(--monospace); color: var(--text-sec);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      min-width: 0;
+    }
+    .zap-selector.stable { color: var(--text-sec); }
+    .zap-selector.dynamic { color: var(--red); text-decoration: line-through; opacity: 0.6; font-size: 10px; }
+
+    .zap-tag {
+      font-size: 10px; padding: 1px 6px; border-radius: 3px;
+      border: 1px solid var(--border); color: var(--text-muted);
+      text-transform: uppercase; font-family: var(--monospace);
+    }
+
+    .zap-time {
+      font-size: 10px; color: var(--text-muted); white-space: nowrap;
+    }
+
+    .zap-persistent-badge {
+      font-size: 9px; padding: 0 5px; border-radius: 3px;
+      border: 1px solid var(--red); color: var(--red);
+      white-space: nowrap; text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .zap-persistent-badge.disabled {
+      border-color: var(--border); color: var(--text-muted);
+    }
+
+    .btn-toggle {
+      border: none; background: none; color: var(--text-muted);
+      cursor: pointer; font-size: 11px; padding: 2px 5px;
+      border-radius: 3px;
+    }
+    .btn-toggle:hover { background: var(--hover); }
+    .btn-toggle.off { opacity: 0.4; }
+
+    /* Empty state */
+    .empty {
+      text-align: center; padding: 60px 20px;
+      color: var(--text-muted); font-size: 13px;
+    }
+
+    /* Confirm modal */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 100;
+      background: rgba(0,0,0,0.4); align-items: center; justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+
+    .modal {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+      padding: 20px; width: 320px; max-width: 90vw;
+    }
+    .modal h3 { font-size: 14px; margin-bottom: 8px; }
+    .modal p { font-size: 13px; color: var(--text-sec); margin-bottom: 16px; }
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .modal-actions button {
+      padding: 6px 14px; border-radius: 5px; font-size: 12px; cursor: pointer;
+      border: 1px solid var(--border); background: var(--bg); color: var(--text);
+    }
+    .modal-actions .btn-confirm {
+      background: var(--red); color: #fff; border-color: var(--red);
+    }
+    .modal-actions .btn-confirm:hover { opacity: 0.9; }
+
+    /* ==============================================
+       SETTINGS PANEL STYLES
+       ============================================== */
+
+    .section {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.6px; color: var(--text-muted);
+      padding: 12px 20px 6px;
+    }
+
+    .setting {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 20px;
+    }
+    .setting:hover { background: var(--hover); }
+
+    .setting-info { flex: 1; margin-right: 16px; }
+    .setting-label { font-size: 13px; color: var(--text); }
+    .setting-desc { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+    /* Toggle switch */
+    .toggle {
+      position: relative; width: 38px; height: 22px;
+      background: var(--border); border-radius: 11px;
+      cursor: pointer; flex-shrink: 0; transition: background 0.15s;
+    }
+    .toggle.on { background: var(--red); }
+    .toggle::after {
+      content: ''; position: absolute; top: 3px; left: 3px;
+      width: 16px; height: 16px; background: #fff;
+      border-radius: 50%; transition: transform 0.15s;
+    }
+    .toggle.on::after { transform: translateX(16px); }
+
+    /* Select */
+    .select {
+      padding: 5px 8px; border: 1px solid var(--border); border-radius: 5px;
+      background: var(--bg); color: var(--text); font-size: 12px;
+      cursor: pointer; outline: none;
+    }
+    .select:focus { border-color: var(--red); }
+
+    /* Textarea */
+    .text-input {
+      width: 100%; padding: 8px 10px; border: 1px solid var(--border);
+      border-radius: 5px; background: var(--bg); color: var(--text);
+      font-size: 12px; font-family: 'SF Mono', Consolas, Monaco, monospace;
+      outline: none; resize: vertical;
+    }
+    .text-input:focus { border-color: var(--red); }
+    .text-input::placeholder { color: var(--text-muted); }
+
+    .input-hint {
+      font-size: 11px; color: var(--text-muted); margin-top: 4px;
+    }
+
+    .textarea-setting {
+      padding: 10px 20px 16px;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 7px 14px; border: 1px solid var(--border); border-radius: 5px;
+      background: var(--bg); color: var(--text); font-size: 12px; cursor: pointer;
+    }
+    .btn:hover { background: var(--hover); }
+    .btn.danger { color: var(--red); }
+    .btn.danger:hover { background: var(--red-bg); }
+
+    .btn-row { display: flex; gap: 8px; padding: 10px 20px 16px; }
+
+    /* Keyboard shortcuts */
+    .kbd {
+      display: inline-block; padding: 2px 6px; border: 1px solid var(--border);
+      border-radius: 3px; font-size: 11px; font-family: 'SF Mono', Consolas, monospace;
+      color: var(--text-sec); background: var(--bg-card);
+    }
+
+    /* Developer section */
+    .dev-header {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 20px; border-bottom: 1px solid var(--border);
+    }
+    .dev-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 1px solid var(--border);
+    }
+    .dev-info { flex: 1; }
+    .dev-name { font-size: 14px; font-weight: 600; }
+    .dev-handle { font-size: 12px; color: var(--text-muted); }
+    .dev-links { display: flex; gap: 8px; }
+    .btn-link {
+      padding: 5px 12px; border: 1px solid var(--border); border-radius: 5px;
+      background: var(--bg); color: var(--text-sec); font-size: 11px;
+      cursor: pointer; text-decoration: none; display: inline-flex;
+      align-items: center; gap: 5px;
+    }
+    .btn-link:hover { background: var(--hover); color: var(--text); }
+
+    /* Addon cards */
+    .addon-list { list-style: none; }
+    .addon-card {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 20px;
+      border-bottom: 1px solid var(--border);
+      text-decoration: none; color: var(--text);
+    }
+    .addon-card:hover { background: var(--hover); }
+    .addon-card:last-child { border-bottom: none; }
+    .addon-icon {
+      width: 36px; height: 36px; border-radius: 6px;
+      border: 1px solid var(--border); flex-shrink: 0;
+      background: var(--bg-card);
+    }
+    .addon-info { flex: 1; min-width: 0; }
+    .addon-name {
+      font-size: 13px; font-weight: 500;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .addon-summary {
+      font-size: 11px; color: var(--text-muted);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      margin-top: 1px;
+    }
+    .addon-stats {
+      display: flex; flex-direction: column; align-items: flex-end; gap: 2px;
+      flex-shrink: 0;
+    }
+    .addon-users {
+      font-size: 12px; font-weight: 600; color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+    .addon-rating { font-size: 11px; color: var(--text-muted); }
+    .addon-stars { color: var(--text-muted); font-size: 10px; letter-spacing: -1px; }
+
+    .addon-refresh {
+      display: flex; align-items: center; justify-content: center;
+      gap: 6px; padding: 8px 20px 14px;
+      font-size: 11px; color: var(--text-muted);
+    }
+    .btn-refresh-stats {
+      border: 1px solid var(--border); border-radius: 4px;
+      background: var(--bg); color: var(--text-sec); font-size: 11px;
+      padding: 3px 10px; cursor: pointer;
+    }
+    .btn-refresh-stats:hover { background: var(--hover); }
+    .btn-refresh-stats.loading { opacity: 0.5; pointer-events: none; }
+
+    .addon-summary-bar {
+      padding: 8px 20px; border-top: 1px solid var(--border);
+      font-size: 11px; color: var(--text-muted);
+      display: flex; gap: 16px;
+    }
+    .addon-summary-bar span { font-variant-numeric: tabular-nums; }
+    .addon-summary-bar strong { color: var(--text-sec); }
+
+    /* ---- Toast ---- */
+    .toast {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: var(--text); color: var(--bg); padding: 8px 16px;
+      border-radius: 6px; font-size: 12px; z-index: 200;
+      opacity: 0; transition: opacity 0.2s; pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <img class="topbar-logo" src="../icons/icon-32.png" alt="">
+    <h1>Content Zapper</h1>
+    <span class="topbar-count" id="dashCount">0 zaps total</span>
+  </div>
+
+  <!-- Main tabs: Dashboard / Settings -->
+  <div class="main-tabs">
+    <button class="main-tab active" data-panel="dashboard">Dashboard</button>
+    <button class="main-tab" data-panel="settings">Settings</button>
+  </div>
+
+  <!-- =================== DASHBOARD PANEL =================== -->
+  <div class="tab-panel active" id="panelDashboard">
+    <div class="sub-tabs">
+      <button class="sub-tab active" data-tab="rules">Persistent Rules</button>
+      <button class="sub-tab" data-tab="history">History</button>
+    </div>
+
+    <div class="toolbar">
+      <input class="toolbar-search" id="dashSearch" type="text" placeholder="Filter sites...">
+      <button class="btn-tool danger" id="btnClearAll">Clear All</button>
+      <button class="btn-tool" id="btnExport">Export</button>
+    </div>
+
+    <ul class="site-list" id="siteList"></ul>
+
+    <div class="empty" id="emptyState" style="display:none;">
+      <div class="empty-icon">&#9711;</div>
+      <div class="empty-text">No zaps recorded yet. Activate the Zapper and start removing elements.</div>
+    </div>
+  </div>
+
+  <!-- =================== SETTINGS PANEL =================== -->
+  <div class="tab-panel" id="panelSettings">
+    <!-- Appearance -->
+    <div class="section">
+      <div class="section-title">Appearance</div>
+      <div class="setting">
+        <div class="setting-info">
+          <div class="setting-label">Theme</div>
+          <div class="setting-desc">UI color scheme for popup and pages</div>
+        </div>
+        <select class="select" id="theme">
+          <option value="auto">System default</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </div>
+      <div class="setting">
+        <div class="setting-info">
+          <div class="setting-label">Show element path bar</div>
+          <div class="setting-desc">Bottom bar showing hovered element details</div>
+        </div>
+        <div class="toggle on" data-key="showPath"></div>
+      </div>
+      <div class="setting">
+        <div class="setting-info">
+          <div class="setting-label">Toast notifications</div>
+          <div class="setting-desc">Brief confirmations after actions</div>
+        </div>
+        <div class="toggle on" data-key="showToast"></div>
+      </div>
+      <div class="setting">
+        <div class="setting-info">
+          <div class="setting-label">Zap animations</div>
+          <div class="setting-desc">Fade-out animation when elements are removed</div>
+        </div>
+        <div class="toggle on" data-key="animation"></div>
+      </div>
+    </div>
+
+    <!-- Behavior -->
+    <div class="section">
+      <div class="section-title">Behavior</div>
+      <div class="setting">
+        <div class="setting-info">
+          <div class="setting-label">Record zap history</div>
+          <div class="setting-desc">Save selectors to dashboard for later review</div>
+        </div>
+        <div class="toggle on" data-key="recordHistory"></div>
+      </div>
+      <div class="setting">
+        <div class="setting-info">
+          <div class="setting-label">Badge counter</div>
+          <div class="setting-desc">Show zap count on toolbar icon</div>
+        </div>
+        <div class="toggle on" data-key="showBadge"></div>
+      </div>
+    </div>
+
+    <!-- Shortcuts -->
+    <div class="section">
+      <div class="section-title">Keyboard Shortcuts</div>
+      <div class="setting">
+        <div class="setting-info">
+          <div class="setting-label">Toggle Zapper</div>
+        </div>
+        <span class="kbd">Alt</span> + <span class="kbd">Z</span>
+      </div>
+      <div class="setting">
+        <div class="setting-info">
+          <div class="setting-label">Undo last zap</div>
+        </div>
+        <span class="kbd">Alt</span> + <span class="kbd">Shift</span> + <span class="kbd">Z</span>
+      </div>
+      <div class="setting">
+        <div class="setting-info">
+          <div class="setting-label">Exit Zapper</div>
+        </div>
+        <span class="kbd">Esc</span>
+      </div>
+    </div>
+
+    <!-- Selector blacklist -->
+    <div class="section">
+      <div class="section-title">Selector Blacklist</div>
+      <div class="textarea-setting">
+        <textarea class="text-input" id="blacklist" rows="4"
+          placeholder="One CSS selector per line.&#10;e.g.  .cookie-banner, #newsletter-popup, div.ad-container"></textarea>
+        <div class="input-hint">These selectors will be automatically zapped on every page load.</div>
+      </div>
+    </div>
+
+    <!-- Data -->
+    <div class="section">
+      <div class="section-title">Data</div>
+      <div class="btn-row">
+        <button class="btn" id="btnExportSettings">Export settings</button>
+        <button class="btn" id="btnImportSettings">Import settings</button>
+        <button class="btn danger" id="btnResetAll">Reset all</button>
+      </div>
+      <input type="file" id="fileImport" accept=".json" style="display:none;">
+    </div>
+
+    <!-- Developer -->
+    <div class="section">
+      <div class="section-title">Developer</div>
+      <div class="dev-header">
+        <img class="dev-avatar" src="https://addons.mozilla.org/user-media/userpics/66/7466/18887466/18887466.png?modified=1749750052" alt="">
+        <div class="dev-info">
+          <div class="dev-name">devvyyxyz</div>
+          <div class="dev-handle">Firefox Add-ons Author</div>
+        </div>
+        <div class="dev-links">
+          <a class="btn-link" href="https://github.com/sponsors/devvyyxyz" target="_blank">&#9829; Sponsor</a>
+          <a class="btn-link" href="https://addons.mozilla.org/en-GB/firefox/user/18887466/" target="_blank">AMO Profile &#8599;</a>
+        </div>
+      </div>
+      <ul class="addon-list" id="addonList"></ul>
+      <div class="addon-summary-bar" id="addonSummary"></div>
+      <div class="addon-refresh">
+        <span id="lastRefreshed"></span>
+        <button class="btn-refresh-stats" id="btnRefreshAddons">&#8635; Refresh stats</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm modal (shared) -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <h3 id="modalTitle">Confirm</h3>
+      <p id="modalMsg">Are you sure?</p>
+      <div class="modal-actions">
+        <button id="modalCancel">Cancel</button>
+        <button class="btn-confirm" id="modalConfirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
